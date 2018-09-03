@@ -1,0 +1,28 @@
+diff --git a/build/pack.c b/build/pack.c
+index ab23908..bff8eb6 100644
+--- a/build/pack.c
++++ b/build/pack.c
+@@ -11,6 +11,7 @@
+ 
+ #include <rpm/rpmlib.h>			/* RPMSIGTAG*, rpmReadPackageFile */
+ #include <rpm/rpmfileutil.h>
++#include <rpm/rpmio.h>
+ #include <rpm/rpmlog.h>
+ 
+ #include "rpmio/rpmio_internal.h"	/* fdInitDigest, fdFiniDigest */
+@@ -120,7 +121,14 @@ static const char * buildHost(void)
+     struct hostent *hbn;
+ 
+     if (! oneshot) {
+-        (void) gethostname(hostname, sizeof(hostname));
++        char * hostname_macro;
++	hostname_macro = rpmExpand("%{?_rpm_build_hostname}", NULL);
++	if (strlen(hostname_macro))
++	    strncpy(hostname, hostname_macro, sizeof(hostname)-1);
++	else
++	    (void) gethostname(hostname, sizeof(hostname)-1);
++	hostname_macro = _free(hostname_macro);
++
+ 	hbn = gethostbyname(hostname);
+ 	if (hbn)
+ 	    strcpy(hostname, hbn->h_name);
