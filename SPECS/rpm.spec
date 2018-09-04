@@ -9,7 +9,7 @@
 # disable plugins initially
 %bcond_without plugins
 
-%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%{!?python3_sitearch: %global python3_sitearch %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 %define rpmhome /usr/lib/rpm
 
@@ -117,6 +117,9 @@ Patch401: rpm-4.11.3-disable-collection-plugins.patch
 # Remove EVR check
 Patch402: rpm-4.11.3-EVR-validity-check.patch
 
+# Build for Python3
+Patch450: rpm-4.11.3-python3.patch
+
 Patch1000: rpm-4.11.1-hostnamemacro.patch
 
 # Partially GPL/LGPL dual-licensed and some bits with BSD
@@ -157,7 +160,7 @@ BuildRequires: libselinux-devel
 BuildRequires: libsemanage-devel
 BuildRequires: ncurses-devel
 BuildRequires: bzip2-devel >= 0.9.0c-2
-BuildRequires: python-devel >= 2.6
+BuildRequires: python3-devel >= 3.3
 BuildRequires: lua-devel >= 5.1
 BuildRequires: libcap-devel
 BuildRequires: libacl-devel
@@ -254,17 +257,17 @@ Requires: rpm-build-libs%{_isa} = %{version}-%{release}
 %description sign
 This package contains support for digitally signing RPM packages.
 
-%package python
+%package python3
 Summary: Python bindings for apps which will manipulate RPM packages
 Group: Development/Libraries
 Requires: rpm = %{version}-%{release}
 
-%description python
-The rpm-python package contains a module that permits applications
-written in the Python programming language to use the interface
+%description python3
+The rpm-python3 package contains a module that permits applications
+written in the Python 3 programming language to use the interface
 supplied by RPM Package Manager libraries.
 
-This package should be installed if you want to develop Python
+This package should be installed if you want to develop Python 3
 programs that will manipulate RPM packages and databases.
 
 %package apidocs
@@ -361,6 +364,8 @@ Requires: rpm-libs%{_isa} = %{version}-%{release}
 %patch401 -p1 -b .disable-collection-plugins
 %patch402 -p1 -b .remove-EVR-check
 
+%patch450 -p1 -b .python3
+
 %patch5 -p1 -b .armhfp
 # this patch cant be applied on softfp builds
 %ifnarch armv3l armv4b armv4l armv4tl armv5tel armv5tejl armv6l armv7l
@@ -380,7 +385,8 @@ ln -s db-%{bdbver} db
 %endif
 CPPFLAGS="$CPPFLAGS `pkg-config --cflags nss`"
 CFLAGS="$RPM_OPT_FLAGS"
-export CPPFLAGS CFLAGS LDFLAGS
+PYTHON="/usr/bin/python3"
+export CPPFLAGS CFLAGS LDFLAGS PYTHON
 
 # Using configure macro has some unwanted side-effects on rpm platform
 # setup, use the old-fashioned way for now only defining minimal paths.
@@ -577,9 +583,9 @@ exit 0
 %{_bindir}/rpmsign
 %{_mandir}/man8/rpmsign.8*
 
-%files python
+%files python3
 %defattr(-,root,root)
-%{python_sitearch}/rpm
+%{python3_sitearch}/rpm
 
 %files devel
 %defattr(-,root,root)

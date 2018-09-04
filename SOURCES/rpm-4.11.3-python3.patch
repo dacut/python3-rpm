@@ -1,0 +1,243 @@
+Common subdirectories: rpm-4.11.3.orig/autodeps and rpm-4.11.3.patch/autodeps
+Only in rpm-4.11.3.patch: autom4te.cache
+Common subdirectories: rpm-4.11.3.orig/build and rpm-4.11.3.patch/build
+diff -up rpm-4.11.3.orig/configure rpm-4.11.3.patch/configure
+--- rpm-4.11.3.orig/configure	2018-09-04 00:13:03.478970679 +0000
++++ rpm-4.11.3.patch/configure	2018-09-04 00:16:59.898352657 +0000
+@@ -651,6 +651,10 @@ RUNDIR
+ RPMCANONGNU
+ RPMCANONOS
+ RPMCANONVENDOR
++DBUS_FALSE
++DBUS_TRUE
++DBUS_LIBS
++DBUS_CFLAGS
+ ENABLE_PLUGINS_FALSE
+ ENABLE_PLUGINS_TRUE
+ WITH_LUA_FALSE
+@@ -945,7 +949,9 @@ YACC
+ YFLAGS
+ PYTHON
+ LUA_CFLAGS
+-LUA_LIBS'
++LUA_LIBS
++DBUS_CFLAGS
++DBUS_LIBS'
+ ac_subdirs_all='db3'
+ 
+ # Initialize some variables set by options.
+@@ -1632,6 +1638,8 @@ Some influential environment variables:
+   PYTHON      the Python interpreter
+   LUA_CFLAGS  C compiler flags for LUA, overriding pkg-config
+   LUA_LIBS    linker flags for LUA, overriding pkg-config
++  DBUS_CFLAGS C compiler flags for DBUS, overriding pkg-config
++  DBUS_LIBS   linker flags for DBUS, overriding pkg-config
+ 
+ Use these variables to override the choices made by `configure' or to help
+ it to find libraries and programs with nonstandard names/locations.
+@@ -18239,7 +18247,7 @@ done
+   done
+ IFS=$as_save_IFS
+ 
+-  test -z "$ac_cv_path___PYTHON" && ac_cv_path___PYTHON="/usr/bin/python"
++  test -z "$ac_cv_path___PYTHON" && ac_cv_path___PYTHON="/usr/bin/python3"
+   ;;
+ esac
+ fi
+@@ -22493,13 +22501,13 @@ if test "$enable_python" = yes; then :
+ 
+         if test -n "$PYTHON"; then
+       # If the user set $PYTHON, use it and don't search something else.
+-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PYTHON version is >= 2.6" >&5
+-$as_echo_n "checking whether $PYTHON version is >= 2.6... " >&6; }
++      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $PYTHON version is >= 3.3" >&5
++$as_echo_n "checking whether $PYTHON version is >= 3.3... " >&6; }
+       prog="import sys
+ # split strings by '.' and convert to numeric.  Append some zeros
+ # because we need at least 4 digits for the hex conversion.
+ # map returns an iterator in Python 3.0 and a list in 2.x
+-minver = list(map(int, '2.6'.split('.'))) + [0, 0, 0]
++minver = list(map(int, '3.3'.split('.'))) + [0, 0, 0]
+ minverhex = 0
+ # xrange is not present in Python 3.0 and range returns an iterator
+ for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+@@ -22520,8 +22528,8 @@ fi
+     else
+       # Otherwise, try each interpreter until we find one that satisfies
+       # VERSION.
+-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a Python interpreter with version >= 2.6" >&5
+-$as_echo_n "checking for a Python interpreter with version >= 2.6... " >&6; }
++      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a Python interpreter with version >= 3.3" >&5
++$as_echo_n "checking for a Python interpreter with version >= 3.3... " >&6; }
+ if ${am_cv_pathless_PYTHON+:} false; then :
+   $as_echo_n "(cached) " >&6
+ else
+@@ -22532,7 +22540,7 @@ else
+ # split strings by '.' and convert to numeric.  Append some zeros
+ # because we need at least 4 digits for the hex conversion.
+ # map returns an iterator in Python 3.0 and a list in 2.x
+-minver = list(map(int, '2.6'.split('.'))) + [0, 0, 0]
++minver = list(map(int, '3.3'.split('.'))) + [0, 0, 0]
+ minverhex = 0
+ # xrange is not present in Python 3.0 and range returns an iterator
+ for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+@@ -22782,7 +22790,7 @@ return Py_Main ();
+   return 0;
+ }
+ _ACEOF
+-for ac_lib in '' python${PYTHON_VERSION} python; do
++for ac_lib in '' python${PYTHON_VERSION}m python${PYTHON_VERSION} python; do
+   if test -z "$ac_lib"; then
+     ac_res="none required"
+   else
+@@ -24339,6 +24347,94 @@ else
+ fi
+ 
+ 
++with_dbus=no
++if test "$enable_plugins" != no; then :
++
++
++pkg_failed=no
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for DBUS" >&5
++$as_echo_n "checking for DBUS... " >&6; }
++
++if test -n "$DBUS_CFLAGS"; then
++    pkg_cv_DBUS_CFLAGS="$DBUS_CFLAGS"
++ elif test -n "$PKG_CONFIG"; then
++    if test -n "$PKG_CONFIG" && \
++    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"dbus-1 >= 1.0\""; } >&5
++  ($PKG_CONFIG --exists --print-errors "dbus-1 >= 1.0") 2>&5
++  ac_status=$?
++  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++  test $ac_status = 0; }; then
++  pkg_cv_DBUS_CFLAGS=`$PKG_CONFIG --cflags "dbus-1 >= 1.0" 2>/dev/null`
++		      test "x$?" != "x0" && pkg_failed=yes
++else
++  pkg_failed=yes
++fi
++ else
++    pkg_failed=untried
++fi
++if test -n "$DBUS_LIBS"; then
++    pkg_cv_DBUS_LIBS="$DBUS_LIBS"
++ elif test -n "$PKG_CONFIG"; then
++    if test -n "$PKG_CONFIG" && \
++    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"dbus-1 >= 1.0\""; } >&5
++  ($PKG_CONFIG --exists --print-errors "dbus-1 >= 1.0") 2>&5
++  ac_status=$?
++  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++  test $ac_status = 0; }; then
++  pkg_cv_DBUS_LIBS=`$PKG_CONFIG --libs "dbus-1 >= 1.0" 2>/dev/null`
++		      test "x$?" != "x0" && pkg_failed=yes
++else
++  pkg_failed=yes
++fi
++ else
++    pkg_failed=untried
++fi
++
++
++
++if test $pkg_failed = yes; then
++   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
++
++if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
++        _pkg_short_errors_supported=yes
++else
++        _pkg_short_errors_supported=no
++fi
++        if test $_pkg_short_errors_supported = yes; then
++	        DBUS_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "dbus-1 >= 1.0" 2>&1`
++        else
++	        DBUS_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "dbus-1 >= 1.0" 2>&1`
++        fi
++	# Put the nasty error message in config.log where it belongs
++	echo "$DBUS_PKG_ERRORS" >&5
++
++	with_dbus=no
++elif test $pkg_failed = untried; then
++     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
++	with_dbus=no
++else
++	DBUS_CFLAGS=$pkg_cv_DBUS_CFLAGS
++	DBUS_LIBS=$pkg_cv_DBUS_LIBS
++        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
++$as_echo "yes" >&6; }
++
++$as_echo "#define DBUS 1" >>confdefs.h
++ with_dbus=yes
++fi
++
++
++
++fi
++ if test "$with_dbus" = yes; then
++  DBUS_TRUE=
++  DBUS_FALSE='#'
++else
++  DBUS_TRUE='#'
++  DBUS_FALSE=
++fi
++
+ 
+ with_dmalloc=no
+ 
+@@ -24720,6 +24816,10 @@ if test -z "${ENABLE_PLUGINS_TRUE}" && t
+   as_fn_error $? "conditional \"ENABLE_PLUGINS\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
++if test -z "${DBUS_TRUE}" && test -z "${DBUS_FALSE}"; then
++  as_fn_error $? "conditional \"DBUS\" was never defined.
++Usually this means the macro was only invoked conditionally." "$LINENO" 5
++fi
+ if test -z "${WITH_INTERNAL_DB_TRUE}" && test -z "${WITH_INTERNAL_DB_FALSE}"; then
+   as_fn_error $? "conditional \"WITH_INTERNAL_DB\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+diff -up rpm-4.11.3.orig/configure.ac rpm-4.11.3.patch/configure.ac
+--- rpm-4.11.3.orig/configure.ac	2018-09-04 00:13:03.358970984 +0000
++++ rpm-4.11.3.patch/configure.ac	2018-09-04 00:15:39.350566066 +0000
+@@ -127,7 +127,7 @@ AC_MSG_CHECKING(old version of patch)
+ 
+ AC_PATH_PROG(__PERL, perl, /usr/bin/perl, $MYPATH)
+ AC_PATH_PROG(__PGP, pgp, /usr/bin/pgp, $MYPATH)
+-AC_PATH_PROG(__PYTHON, python, /usr/bin/python, $MYPATH) 
++AC_PATH_PROG(__PYTHON, python, /usr/bin/python3, $MYPATH) 
+ AC_PATH_PROG(__RM, rm, /bin/rm, $MYPATH)
+ AC_PATH_PROG(__RSH, rsh, /usr/bin/rsh, $MYPATH)
+ AC_PATH_PROG(__SED, sed, /bin/sed, $MYPATH)
+@@ -540,7 +540,7 @@ esac],
+ [enable_python=no])
+ 
+ AS_IF([test "$enable_python" = yes],[
+-  AM_PATH_PYTHON([2.6],[
++  AM_PATH_PYTHON([3.3],[
+     WITH_PYTHON_INCLUDE=`${PYTHON} -c 'from distutils.sysconfig import *; import sys; sys.stdout.write(get_python_inc())'`
+     WITH_PYTHON_SUBPACKAGE=1
+     save_CPPFLAGS="$CPPFLAGS"
+@@ -550,7 +550,7 @@ AS_IF([test "$enable_python" = yes],[
+       ])
+     CPPFLAGS="$save_CPPFLAGS"
+     save_LIBS="$LIBS"
+-    AC_SEARCH_LIBS([Py_Main],[python${PYTHON_VERSION} python],[
++    AC_SEARCH_LIBS([Py_Main],[python${PYTHON_VERSION}m python${PYTHON_VERSION} python],[
+       WITH_PYTHON_LIB="$ac_res"
+     ],[AC_MSG_ERROR([missing python library])
+     ])
+Common subdirectories: rpm-4.11.3.orig/db3 and rpm-4.11.3.patch/db3
+Common subdirectories: rpm-4.11.3.orig/doc and rpm-4.11.3.patch/doc
+Common subdirectories: rpm-4.11.3.orig/fileattrs and rpm-4.11.3.patch/fileattrs
+Common subdirectories: rpm-4.11.3.orig/lib and rpm-4.11.3.patch/lib
+Common subdirectories: rpm-4.11.3.orig/luaext and rpm-4.11.3.patch/luaext
+Common subdirectories: rpm-4.11.3.orig/m4 and rpm-4.11.3.patch/m4
+Common subdirectories: rpm-4.11.3.orig/misc and rpm-4.11.3.patch/misc
+Common subdirectories: rpm-4.11.3.orig/plugins and rpm-4.11.3.patch/plugins
+Common subdirectories: rpm-4.11.3.orig/po and rpm-4.11.3.patch/po
+Common subdirectories: rpm-4.11.3.orig/python and rpm-4.11.3.patch/python
+Common subdirectories: rpm-4.11.3.orig/rpmio and rpm-4.11.3.patch/rpmio
+Common subdirectories: rpm-4.11.3.orig/scripts and rpm-4.11.3.patch/scripts
+Common subdirectories: rpm-4.11.3.orig/sign and rpm-4.11.3.patch/sign
+Common subdirectories: rpm-4.11.3.orig/tests and rpm-4.11.3.patch/tests
+Common subdirectories: rpm-4.11.3.orig/tools and rpm-4.11.3.patch/tools
